@@ -1,0 +1,53 @@
+<?php
+/**
+ * Plugin Name: Order Tracking
+ * Plugin URI: https://www.example.com/
+ * Description: A plugin that adds order tracking information to WooCommerce orders and sends an email to customers with tracking information.
+ * Version: 1.0.3
+ * Author: Your Name
+ * Author URI: https://www.example.com/
+ * License: GPLv2 or later
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.html
+ */
+
+// Include the WordPress functions file
+require_once(ABSPATH . 'wp-includes/functions.php');
+
+// Include the WooCommerce functions file
+require_once(ABSPATH . 'wp-content/plugins/woocommerce/includes/wc-core-functions.php');
+
+// Add the order tracking field to the order details page in the admin dashboard
+function add_order_tracking_field() {
+  global $post;
+  
+  $order = wc_get_order($post->ID);
+  $order_status = $order->get_status();
+  if ($order_status == 'completed') {
+    // Only display the order tracking field if the order has been completed
+    $order_tracking = get_post_meta($post->ID, 'order_tracking', true);
+    $delivery_partner = get_post_meta($post->ID, 'delivery_partner', true);
+    ?>
+    <div class="order_data_column">
+      <h4>Order Tracking</h4>
+      <p class="form-field form-field-wide">
+        <label for="order_tracking">Tracking Number:</label>
+        <input type="text" id="order_tracking" name="order_tracking" value="<?php echo $order_tracking; ?>" />
+      </p>
+      <p class="form-field form-field-wide">
+        <label for="delivery_partner">Delivery Partner:</label>
+        <select id="delivery_partner" name="delivery_partner">
+          <option value="dhl" <?php selected($delivery_partner, 'dhl'); ?>>DHL</option>
+          <option value="evri" <?php selected($delivery_partner, 'evri'); ?>>EVRI</option>
+          <option value="parcelforce" <?php selected($delivery_partner, 'parcelforce'); ?>>Parcelforce</option>
+          <option value="royalmail" <?php selected($delivery_partner, 'royalmail'); ?>>Royal Mail</option>
+        </select>
+      </p>
+    </div>
+    <?php
+  }
+}
+add_action('woocommerce_admin_order_data_after_order_details', 'add_order_tracking_field');
+
+// Save the order tracking information when the order is saved
+function save_order_tracking_field($post_id) {
+  $order_tracking = sanitize_text_
